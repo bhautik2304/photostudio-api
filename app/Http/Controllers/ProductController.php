@@ -2,8 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\product;
 use Illuminate\Http\Request;
+use App\Models\{
+    product,
+
+    productorientation,
+    productSize,
+    productcovers,
+    productboxsleeve,
+    productsheet,
+    productpapperprice,
+    productboxsleeveprice,
+    productsheetprice,
+    productcoverprice,
+    productpaper
+};
+
 
 class ProductController extends Controller
 {
@@ -15,7 +29,14 @@ class ProductController extends Controller
     public function index()
     {
         //
-        return response(["product"=>product::get()->groupBy('product_orientation')],200);
+        return response(
+            [
+                'success' => true,
+                'message' => 'Product List',
+                'data' => product::all()
+            ],
+            200
+        );
     }
 
     /**
@@ -37,26 +58,111 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         //
-        $products=new product;
-        $products->size=$request->size;
-        $products->product_orientation=$request->product_orientation;
-        $products->thermal_sheet=$request->thermal_sheet;
-        $products->white_sheet=$request->white_sheet;
-        $products->black_sheet=$request->black_sheet;
-        $products->image_wrap=$request->image_wrap;
-        $products->leather=$request->leather;
-        $products->photo=$request->photo;
-        $products->acrylic_cameo=$request->acrylic_cameo;
-        $products->canvas=$request->canvas;
-        $products->leather_box=$request->leather_box;
-        $products->photo_box=$request->photo_box;
-        $products->linen_box=$request->linen_box;
-        $products->leather_sleeve=$request->leather_sleeve;
+        $products = new product;
+        $products->name = $request->name;
+        $products->img = storeFile($request, 'img', '/img/products/');
+        $products->min_page = $request->min_page;
         $products->save();
 
-        return response(["msg"=>""],200);
+        return response([
+            'success' => true,
+            'message' => 'Product Created successfully'
+        ], 200);
     }
 
+    public function createProductResource(Request $request, $id)
+    {
+
+        // create product orientation
+        foreach ($request->toArray() as $value) {
+            $orientation = new productorientation();
+            $orientation->product_id = $id;
+            $orientation->orientation_id = $value['orientation_id'];
+            $orientation->save();
+
+            // create product size
+            foreach ($value['sizeData'] as $size) {
+                $sizes = new productSize();
+                $sizes->productorientation_id  = $orientation->id;
+                $sizes->size_id  = $size['size_id'];
+                $sizes->save();
+
+                // create product sheet
+                if (isset($size['sheetData'])) {
+                    foreach ($size['sheetData'] as $sheetData) {
+                        $sheets = new productsheet();
+                        $sheets->product_size_id = $sizes->id;
+                        $sheets->sheet_id = $sheetData['sheet_id'];
+                        $sheets->save();
+
+                        // create product sheet price
+                        foreach ($sheetData['sheetprice'] as $sheetPrice) {
+                            // dd($size['size_id']);
+                            $sheetPrices = new productsheetprice();
+                            $sheetPrices->productsheet_id = $sheets->id;
+                            $sheetPrices->countryzone_id = $sheetPrice['zone_id'];
+                            $sheetPrices->price = $sheetPrice['price'];
+                            $sheetPrices->save();
+                        }
+                    }
+                }
+
+                // create product paper
+                if (isset($size['paperData'])) {
+                    foreach ($size['paperData'] as $paperData) {
+                        $sheets = new productpaper();
+                        $sheets->product_size_id = $sizes->id;
+                        $sheets->paper_id = $paperData['paper_id'];
+                        $sheets->save();
+                    }
+                }
+
+                // create product cover
+                if (isset($size['coverData'])) {
+                    foreach ($size['coverData'] as $cover) {
+                        $covers = new productcovers();
+                        $covers->product_size_id = $sizes->id;
+                        $covers->cover_id = $cover['cover_id'];
+                        $covers->save();
+
+                        // create product sheet price
+                        foreach ($cover['coverprice'] as $coverprice) {
+                            $coverprices = new productcoverprice();
+                            $coverprices->productcover_id = $covers->id;
+                            $coverprices->countryzone_id = $coverprice['zone_id'];
+                            $coverprices->price = $coverprice['price'];
+                            $coverprices->save();
+                        }
+                    }
+                }
+
+                // create product box & sleeve
+                if (isset($size['boxSleeveData'])) {
+                    foreach ($size['boxSleeveData'] as $boxSleeve) {
+                        // dd($boxSleeve['boxSleeve_id']);
+                        $boxsleeves = new productboxsleeve();
+                        $boxsleeves->product_size_id = $sizes->id;
+                        $boxsleeves->boxsleeve_id = $boxSleeve['boxSleeve_id'];
+                        $boxsleeves->save();
+
+                        // create product sheet price
+                        foreach ($boxSleeve['boxSleeveprice'] as $boxSleeveprice) {
+                            $boxsleevep = new productboxsleeveprice();
+                            $boxsleevep->productboxsleeve_id = $boxsleeves->id;
+                            $boxsleevep->countryzone_id = $boxSleeveprice['zone_id'];
+                            $boxsleevep->price = $boxSleeveprice['price'];
+                            $boxsleevep->save();
+                        }
+                    }
+                }
+            }
+        }
+
+        return response([
+            'success' => true,
+            'message' => 'Product Resource Created successfully'
+        ], 200);
+    }
     /**
      * Display the specified resource.
      *
@@ -86,27 +192,24 @@ class ProductController extends Controller
      * @param  \App\Models\product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, product $product,$id)
+    public function update(Request $request, product $product, $id)
     {
         //
         $product->find($id)->update([
-            'size'=>$request->size,
-            'product_orientation'=>$request->product_orientation,
-            'thermal_sheet'=>$request->thermal_sheet,
-            'white_sheet'=>$request->white_sheet,
-            'black_sheet'=>$request->black_sheet,
-            'image_wrap'=>$request->image_wrap,
-            'leather'=>$request->leather,
-            'photo'=>$request->photo,
-            'acrylic_cameo'=>$request->acrylic_cameo,
-            'canvas'=>$request->canvas,
-            'leather_box'=>$request->leather_box,
-            'photo_box'=>$request->photo_box,
-            'linen_box'=>$request->linen_box,
-            'leather_sleeve'=>$request->leather_sleeve,
+            'name' => $request->name,
+            'min_page' => $request->min_page,
         ]);
 
-        return response(["msg"=>""],200);
+        if ($request->hasFile('img')) {
+            $product->find($id)->update([
+                'img' => storeFile($request, 'img', '/img/products/'),
+            ]);
+        }
+
+        return response([
+            'success' => true,
+            'message' => 'Product Updated successfully'
+        ], 200);
     }
 
     /**
@@ -115,11 +218,14 @@ class ProductController extends Controller
      * @param  \App\Models\product  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(product $product,$id)
+    public function destroy(product $products, $id)
     {
         //
-        $product->destroy($id);
+        $products->find($id)->destroy($id);
 
-        return response(["msg"=>""],200);
+        return response([
+            'success' => true,
+            'message' => 'Product Deleted successfully'
+        ], 200);
     }
 }

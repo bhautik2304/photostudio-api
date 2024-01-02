@@ -19,17 +19,22 @@ return new class extends Migration
             $table->unsignedBigInteger("phone_no");
             $table->text("email");
             $table->text("password");
-            $table->text("compunys_name");
-            $table->text("compunys_logo");
-            $table->text("social_link")->nullable();
-            $table->text("social_link")->nullable();
             $table->text("address")->nullable();
             $table->string("state")->nullable();
             $table->string("country")->nullable();
+
+            $table->text("compunys_name");
+            $table->text("compunys_logo");
+            $table->text("social_link_1")->nullable();
+            $table->text("social_link_2")->nullable();
+
+            $table->text("avtar")->nullable();
             $table->boolean("email_veryfi")->default(false);
             $table->boolean("phone_veryfi")->default(false);
             $table->boolean("status")->default(false);
-            $table->enum("pricing_formate",['us','ind'])->nullable();
+            $table->boolean("approved")->default(false);
+            $table->unsignedBigInteger("zone")->nullable();
+            $table->text('token')->nullable();
             $table->timestamps();
         });
     }

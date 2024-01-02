@@ -49,17 +49,20 @@ class CostomerController extends Controller
         //     return response(["msg" => "Wrong otp"], 202);
         // }
 
-        $costomer = new costomerrequist;
+        $costomer = new costomer;
         $costomer->name = $req->name;
         $costomer->phone_no = $req->phone_no;
         $costomer->email = $req->email;
-        $costomer->compunys_name = $req->compunys_name;
-        $costomer->compunys_logo = $req->compunys_logo;
-        $costomer->social_link = $req->social_link;
-        $costomer->social_link = $req->social_link;
+        $costomer->password = Hash::make($req->password);
+
         $costomer->address = $req->address;
         $costomer->state = $req->state;
         $costomer->country = $req->country;
+
+        $costomer->compunys_name = $req->compunys_name;
+        $costomer->compunys_logo = storeFile($req, 'compunys_logo', '/brand/logo/');
+        $costomer->social_link_1 = $req->social_link_1;
+        $costomer->social_link_2 = $req->social_link_2;
         $costomer->save();
 
         event(new newcostomerrequist("$costomer->name Send To Register Request"));
@@ -73,31 +76,22 @@ class CostomerController extends Controller
      * @param  \App\Models\costomer  $costomer
      * @return \Illuminate\Http\Response
      */
-    public function aprovedReq(costomerrequist $costomerreq, $id)
+    public function aprovedReq(costomer $costomerreq, $id)
     {
         //
-        $costomerRequst = $costomerreq->where('id',$id)->first();
-
-        // dd($costomerRequst->toArray());
-
-        if (!$costomerRequst) {
-            # code...
-            return response(["msg" => "approved requst"], 200);
-        }
-
-        $costomer = new costomer;
-        $costomer->name = $costomerRequst->name;
-        $costomer->name = $costomerRequst->name;
-        $costomer->save();
-        $costomer->password = Hash::make($costomerRequst->password);
-
-        $costomerRequst->destroy($id);
+        $costomerreq->find($id)->update([
+            "approved" => 1,
+            "status" => true
+        ]);
 
         return response(["msg" => "Approved"], 200);
     }
-    public function show(costomer $costomer,)
+
+    public function show(Request $request, costomer $costomers)
     {
         //
+        // return
+        return response(["costomer" => $costomers->where('token', $request->header('Authorization'))->first()]);
     }
 
     /**
@@ -127,7 +121,7 @@ class CostomerController extends Controller
             "email" => $req->email,
             "state" => $req->state,
             "country" => $req->country,
-            "default_address" => $req->default_address,
+            "address" => $req->address,
         ]);
 
         return response(["msg" => "Costomer Updated Successfully"]);
@@ -147,25 +141,49 @@ class CostomerController extends Controller
 
         return response(["$costomers Deleted Successfully"]);
     }
-    public function statusUpdate(Request $req,costomer $costomer, $id)
+    public function statusUpdate(Request $req, costomer $costomer, $id)
     {
         //
         $costomers = $costomer->find($id)->update([
-           "status"=>$req->status
+            "status" => $req->status
         ]);
         // $costomer->destroy($id);
 
         return response(["$costomers Status Updated Successfully"]);
     }
-    public function passwordUpdate(Request $req,costomer $costomer, $id)
+    public function passwordUpdate(Request $req, costomer $costomer, $id)
     {
         //
         $costomers = $costomer->find($id)->update([
-            "password"=>Hash::make($req->password)
+            "password" => Hash::make($req->password)
         ]);
         // $costomer->destroy($id);
 
         return response(["$costomers Password Updated Successfully"]);
+    }
+
+    public function zoneUpdate(Request $req, costomer $costomer, $id)
+    {
+        //
+        $costomer->find($id)->update([
+            "zone" => $req->zone
+        ]);
+
+        $costomers = $costomer->find($id)->first();
+
+        return response(["msg" => "$costomers->name zone Updated Successfully", "code" => 200]);
+    }
+
+    public function changeAvtar(Request $req, costomer $costomer, $id)
+    {
+        //
+        $costomer->find($id)->update([
+            "avtar" => storeFile($req, 'avtar', '/costomer/avtar/')
+        ]);
+
+        $costomers = $costomer->find($id)->first();
+
+        return response(["msg" => "$costomers->name Avtar Updated Successfully", "code" => 200]);
     }
 }
 
