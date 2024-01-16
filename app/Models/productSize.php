@@ -14,6 +14,9 @@ class productSize extends Model
         static::addGlobalScope('sizeScope', function (Builder $builder) {
             $builder->with(['size', 'papers', 'cover', 'boxsleeve', 'sheet',]);
         });
+        static::addGlobalScope('orderSizeScope', function (Builder $builder) {
+            $builder->with(['size']);
+        });
     }
 
     public function size()

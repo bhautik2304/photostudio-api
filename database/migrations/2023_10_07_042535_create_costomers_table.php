@@ -34,6 +34,7 @@ return new class extends Migration
             $table->boolean("status")->default(false);
             $table->boolean("approved")->default(false);
             $table->unsignedBigInteger("zone")->nullable();
+            $table->unsignedBigInteger("discount")->default(0);
             $table->text('token')->nullable();
             $table->timestamps();
         });

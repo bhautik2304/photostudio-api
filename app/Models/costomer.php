@@ -36,7 +36,8 @@ class costomer extends Model
         'zone',
         'token',
         'avtar',
-        'otp'
+        'otp',
+        'discount'
     ];
 
     public function zone()

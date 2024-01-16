@@ -185,6 +185,18 @@ class CostomerController extends Controller
 
         return response(["msg" => "$costomers->name Avtar Updated Successfully", "code" => 200]);
     }
+
+    public function changeDiscount(Request $req, costomer $costomer, $id)
+    {
+        //
+        $costomer->find($id)->update([
+            "discount" => $req->discounts
+        ]);
+
+        $costomers = $costomer->find($id)->first();
+
+        return response(["msg" => "$costomers->name Discount Updated Successfully", "code" => 200]);
+    }
 }
 
 // {

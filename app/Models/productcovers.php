@@ -14,6 +14,9 @@ class productcovers extends Model
         static::addGlobalScope('sheetscop', function (Builder $builder) {
             $builder->with('cover', 'coverprice');
         });
+        static::addGlobalScope('orderCoverScop', function (Builder $builder) {
+            $builder->with('cover');
+        });
     }
 
     public function product()
@@ -28,6 +31,6 @@ class productcovers extends Model
 
     public function coverprice()
     {
-        return $this->hasMany(productcoverprice::class, 'productcover_id','id');
+        return $this->hasMany(productcoverprice::class, 'productcover_id', 'id');
     }
 }

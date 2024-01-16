@@ -11,7 +11,7 @@ class product extends Model
 
     protected static function booted(): void
     {
-        static::addGlobalScope('cover', function (Builder $builder) {
+        static::addGlobalScope('orientationScope', function (Builder $builder) {
             $builder->with('orientation');
         });
     }

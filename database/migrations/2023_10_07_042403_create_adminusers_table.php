@@ -16,10 +16,11 @@ return new class extends Migration
         Schema::create('adminusers', function (Blueprint $table) {
             $table->id();
             // $table->unsignedBigInteger("studio_id")->nullable();
-            $table->enum("role",["masteradmin","user"])->default("user");
+            $table->enum("role", ["masteradmin", "user"])->default("user");
             $table->string("name");
             $table->unsignedBigInteger("phone_no");
             $table->text("email");
+            $table->text("token")->nullable();
             $table->text("password");
             $table->boolean("email_veryfi")->default(false);
             $table->boolean("phone_veryfi")->default(false);

@@ -14,6 +14,9 @@ class productorientation extends Model
         static::addGlobalScope('orientationScope', function (Builder $builder) {
             $builder->with(['size', 'orientation']);
         });
+        static::addGlobalScope('orderScope', function (Builder $builder) {
+            $builder->with(['orientation']);
+        });
     }
 
     public function size()
@@ -23,6 +26,6 @@ class productorientation extends Model
 
     public function orientation()
     {
-        return $this->hasOne(orientation::class,'id', 'orientation_id');
+        return $this->hasOne(orientation::class, 'id', 'orientation_id');
     }
 }

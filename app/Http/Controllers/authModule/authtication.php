@@ -12,6 +12,29 @@ class authtication extends Controller
 {
     //
 
+    public function session(Request $req)
+    {
+        $users = adminuser::where('token', $req->token)->first();
+
+        if (!$users) {
+            # code...
+            return response(["msg" => "Users Not Found", "code" => 404], 200);
+        }
+
+        // $token = Str::random(60);
+
+        // $users->update([
+        //     "token" => $token,
+        // ]);
+
+        return response([
+            "msg" => "Login Successfully",
+            "code" => 200,
+            "user" => $users,
+            "accessToken" => $users->token,
+        ], 200);
+    }
+
     public function login(Request $req)
     {
         $users = adminuser::where('email', $req->email)->orWhere('phone_no', $req->email)->first();
@@ -29,11 +52,18 @@ class authtication extends Controller
         //     # code...
         //     return response(["msg" => "Wrong Password", "code" => 404], 200);
         // }
+
+        $token = Str::random(60);
+
+        $users->update([
+            "token" => $token,
+        ]);
+
         return response([
             "msg" => "Login Successfully",
             "code" => 200,
             "user" => $users,
-            "token" => Str::random(60),
+            "accessToken" => $token,
         ], 200);
     }
     public function costomerlogin(Request $req)
@@ -76,9 +106,7 @@ class authtication extends Controller
             "token" => $token,
         ], 200);
     }
-    public function register(Request $req)
-    {
-    }
+
     public function otpvery(Request $req)
     {
     }
@@ -175,7 +203,7 @@ class authtication extends Controller
             # code . . .
             return response(["msg" => "Users Not Found", "code" => 404], 200);
         }
-        
+
         $users->update([
             "password" => Hash::make($req->password),
         ]);
